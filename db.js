@@ -2,7 +2,7 @@ console.log("Try programiz.pro");
 
 const { MongoClient } = require('mongodb');
 
-const uri = "mongodb://localhost:27017";
+const uri = "mongodb://localhost:27017/rqv5203";
 
 let db = null;
 
@@ -24,3 +24,5 @@ function getDB() {
     }
     return db;
 }
+
+module.exports = { connectDB, getDB };

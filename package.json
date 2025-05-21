@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/rqv5203/assignments#readme",
   "dependencies": {
+    "dotenv": "^16.5.0",
     "express": "^5.1.0",
     "mongodb": "^6.16.0"
   }
