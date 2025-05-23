@@ -6,7 +6,7 @@ dotenv.config();
 
 router.post('/request', async function(req, res) {
     const redirectUri = 'http://localhost:3000/auth/linkedin/callback';
-    const linkedinAuthUrl = `https://www.linkedin.com/oauth/v2/authorization?response_type=code&client_id=${process.env.LINKEDIN_CLIENT_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=profile%20email%20openid`;
+    const linkedinAuthUrl = `https://www.linkedin.com/oauth/v2/authorization?response_type=code&client_id=${process.env.LINKEDIN_CLIENT_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=openid%20profile%20email`;
     
     res.json({ url: linkedinAuthUrl });
 });
@@ -20,7 +20,7 @@ router.get('/callback', async function(req, res) {
     }
 
     try {
-        console.log(env.LINKEDIN_CLIENT_ID);
+        //console.log(env.LINKEDIN_CLIENT_ID);
         // Exchange code for access token
         const tokenUrl = 'https://www.linkedin.com/oauth/v2/accessToken';
         const params = new URLSearchParams({
@@ -39,16 +39,16 @@ router.get('/callback', async function(req, res) {
         });
         const tokenData = await tokenResponse.json();
         const accessToken = tokenData.access_token;
+        console.log(accessToken);
 
         // Get user profile data
-        const profileResponse = await fetch('https://api.linkedin.com/v2/me', {
+        const profileResponse = await fetch('https://api.linkedin.com/v2/userinfo', {
             headers: {
                 'Authorization': `Bearer ${accessToken}`,
-                'cache-control': 'no-cache',
-                'X-Restli-Protocol-Version': '2.0.0'
             }
         });
         const userData = await profileResponse.json();
+        console.log(userData);
         
         res.json({ success: true, user: userData });
     } catch (error) {
