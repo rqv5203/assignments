@@ -6,7 +6,7 @@ const {OAuth2Client} = require('google-auth-library');
 dotenv.config();
 
 router.post('/', async function (req, res, next) {
-    const redirectUrl = 'http://localhost:3001/oauth';
+    const redirectUrl = 'http://localhost:3000/oauth';
 
     const oAuth2Client = new OAuth2Client(
         process.env.GOOGLE_CLIENT_ID,
@@ -19,6 +19,8 @@ router.post('/', async function (req, res, next) {
         scope: 'https://www.googleapis.com/auth/userinfo.profile openid',
         prompt: 'consent'
     });
+
+    console.log('authorizeUrl', authorizeUrl);
     res.json({url: authorizeUrl});
 });
 

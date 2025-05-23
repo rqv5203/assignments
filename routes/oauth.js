@@ -13,14 +13,17 @@ async function getUserData(access_token) {
 }
 
 router.get('/', async function(req, res, next) {
-    const code = req.query.code;
+    console.log('oauth route');
     
+    const code = req.query.code;
+    console.log('code', code);
+
     if (!code) {
         return res.status(400).json({ error: 'Authorization code is required' });
     }
 
     try {
-        const redirectUrl = 'http://localhost:3001/oauth';
+        const redirectUrl = 'http://localhost:3000/oauth';
         const oAuth2Client = new OAuth2Client(
             process.env.GOOGLE_CLIENT_ID,
             process.env.GOOGLE_CLIENT_SECRET,
