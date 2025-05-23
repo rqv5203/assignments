@@ -4,7 +4,11 @@ import './App.css';
 import Dashboard from './components/Dashboard';
 
 function App() {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(() => {
+    // Initialize user state from localStorage if it exists
+    const savedUser = localStorage.getItem('user');
+    return savedUser ? JSON.parse(savedUser) : null;
+  });
 
   useEffect(() => {
     // Check URL parameters for authentication response
@@ -12,6 +16,9 @@ function App() {
     if (params.get('success') === 'true') {
       const userData = JSON.parse(decodeURIComponent(params.get('user')));
       setUser(userData);
+      localStorage.setItem('user', JSON.stringify(userData));
+      // Clean up URL parameters
+      window.history.replaceState({}, document.title, window.location.pathname);
     }
   }, []);
 
@@ -33,6 +40,7 @@ function App() {
 
   const handleSignOut = () => {
     setUser(null);
+    localStorage.removeItem('user'); // Clear user data from localStorage
   };
 
   return (
