@@ -7,8 +7,15 @@ function navigate(url) {
   window.location.href = url;
 }
 
-async function auth(){
+async function googleAuth() {
   const response = await fetch('http://localhost:3000/request',
+  {method:'post'});
+  const data = await response.json();
+  navigate(data.url);
+}
+
+async function linkedinAuth() {
+  const response = await fetch('http://localhost:3000/auth/linkedin/request',
   {method:'post'});
   const data = await response.json();
   navigate(data.url);
@@ -16,17 +23,18 @@ async function auth(){
 
 function App() {
   return (
-
-<>
-<h1>Sign in with Google</h1>
-<h3>Google OAuth</h3>
-<button type="button" onClick={()=> auth()}>
-  sign in with google
-</button>
-
-</>
-
-      )
+    <>
+      <h1>Sign in with Social Media</h1>
+      <div className="auth-buttons">
+        <button type="button" onClick={()=> googleAuth()}>
+          Sign in with Google
+        </button>
+        <button type="button" onClick={()=> linkedinAuth()}>
+          Sign in with LinkedIn
+        </button>
+      </div>
+    </>
+  )
 }
 
 export default App;
