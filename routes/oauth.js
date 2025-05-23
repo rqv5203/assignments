@@ -37,10 +37,11 @@ router.get('/', async function(req, res, next) {
         const user = oAuth2Client.credentials;
         const userData = await getUserData(user.access_token);
         
-        res.json({ success: true, user: userData });
+        // Redirect to frontend with user data
+        res.redirect(`http://localhost:3001?success=true&user=${encodeURIComponent(JSON.stringify(userData))}`);
     } catch (error) {
         console.error('Error signing in with Google:', error);
-        res.status(500).json({ error: 'Failed to authenticate with Google' });
+        res.redirect(`http://localhost:3001?success=false&error=${encodeURIComponent('Failed to authenticate with Google')}`);
     }
 });
 

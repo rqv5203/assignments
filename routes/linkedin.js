@@ -20,8 +20,6 @@ router.get('/callback', async function(req, res) {
     }
 
     try {
-        //console.log(env.LINKEDIN_CLIENT_ID);
-        // Exchange code for access token
         const tokenUrl = 'https://www.linkedin.com/oauth/v2/accessToken';
         const params = new URLSearchParams({
             grant_type: 'authorization_code',
@@ -39,21 +37,19 @@ router.get('/callback', async function(req, res) {
         });
         const tokenData = await tokenResponse.json();
         const accessToken = tokenData.access_token;
-        console.log(accessToken);
 
-        // Get user profile data
         const profileResponse = await fetch('https://api.linkedin.com/v2/userinfo', {
             headers: {
                 'Authorization': `Bearer ${accessToken}`,
             }
         });
         const userData = await profileResponse.json();
-        console.log(userData);
         
-        res.json({ success: true, user: userData });
+        // Redirect to frontend with user data
+        res.redirect(`http://localhost:3001?success=true&user=${encodeURIComponent(JSON.stringify(userData))}`);
     } catch (error) {
         console.error('Error signing in with LinkedIn:', error);
-        res.status(500).json({ error: 'Failed to authenticate with LinkedIn' });
+        res.redirect(`http://localhost:3001?success=false&error=${encodeURIComponent('Failed to authenticate with LinkedIn')}`);
     }
 });
 
