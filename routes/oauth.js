@@ -2,13 +2,13 @@ const express = require('express');
 const router = express.Router();
 const dotenv = require('dotenv');
 const {OAuth2Client} = require('google-auth-library');
+const User = require('../models/User');
 
 dotenv.config();
 
 async function getUserData(access_token) {
     const response = await fetch(`https://www.googleapis.com/oauth2/v3/userinfo?access_token=${access_token}`);
     const data = await response.json();
-    console.log('user data', data);
     return data;
 }
 
@@ -35,7 +35,19 @@ router.get('/', async function(req, res, next) {
         console.log('tokens acquired');
         
         const user = oAuth2Client.credentials;
-        const userData = await getUserData(user.access_token);
+        const googleUserData = await getUserData(user.access_token);
+        
+        // Create or update user in MongoDB
+        const userData = {
+            email: googleUserData.email,
+            name: googleUserData.name,
+            picture: googleUserData.picture,
+            provider: 'google',
+            providerId: googleUserData.sub
+        };
+        
+        const userModel = new User(userData);
+        await userModel.save();
         
         // Redirect to frontend with user data
         res.redirect(`http://localhost:3001?success=true&user=${encodeURIComponent(JSON.stringify(userData))}`);

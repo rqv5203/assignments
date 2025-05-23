@@ -1,14 +1,17 @@
 const express = require('express');
 const router = express.Router();
 const dotenv = require('dotenv');
+const User = require('../models/User');
 
 dotenv.config();
 
 router.post('/request', async function(req, res) {
     const redirectUri = 'http://localhost:3000/auth/linkedin/callback';
-    const linkedinAuthUrl = `https://www.linkedin.com/oauth/v2/authorization?response_type=code&client_id=${process.env.LINKEDIN_CLIENT_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=openid%20profile%20email`;
+    const scope = 'openid profile email';
     
-    res.json({ url: linkedinAuthUrl });
+    const authUrl = `https://www.linkedin.com/oauth/v2/authorization?response_type=code&client_id=${process.env.LINKEDIN_CLIENT_ID}&redirect_uri=${redirectUri}&scope=${scope}`;
+    
+    res.json({ url: authUrl });
 });
 
 router.get('/callback', async function(req, res) {
@@ -43,7 +46,19 @@ router.get('/callback', async function(req, res) {
                 'Authorization': `Bearer ${accessToken}`,
             }
         });
-        const userData = await profileResponse.json();
+        const linkedinUserData = await profileResponse.json();
+        
+        // Create or update user in MongoDB
+        const userData = {
+            email: linkedinUserData.email,
+            name: linkedinUserData.name,
+            picture: linkedinUserData.picture,
+            provider: 'linkedin',
+            providerId: linkedinUserData.sub
+        };
+        
+        const userModel = new User(userData);
+        await userModel.save();
         
         // Redirect to frontend with user data
         res.redirect(`http://localhost:3001?success=true&user=${encodeURIComponent(JSON.stringify(userData))}`);
