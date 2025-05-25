@@ -1,15 +1,14 @@
-const express = require('express');
 const { connectDB } = require('./db');
+const app = require('./app');
+const User = require('./models/User');
 
-const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.get('/', (req, res) => {
-    res.send('Hello World');
-});
-
-connectDB().then(() => {
-    app.listen(PORT, () => {
-        console.log(`server is running on port ${PORT}`);
-    });
+connectDB().then(async () => {
+   // Create indexes for the users collection
+   await User.createIndexes();
+   
+   app.listen(PORT, () => {
+      console.log(`server is running on port ${PORT}`);
+   });
 });
