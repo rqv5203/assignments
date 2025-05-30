@@ -1,5 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import GiphySearch from './GiphySearch';
+import './Dashboard.css';
 
 function Dashboard({ user, onSignOut }) {
   const navigate = useNavigate();
@@ -11,23 +13,29 @@ function Dashboard({ user, onSignOut }) {
 
   return (
     <div className="dashboard">
-      <h1>Welcome, {user?.name}!</h1>
-      <div className="user-info">
-        {user?.picture && (
-          <img 
-            src={user.picture} 
-            alt="Profile" 
-            className="profile-picture"
-          />
-        )}
-        <div className="user-details">
-          <p>Email: {user?.email}</p>
-          <p>Full Name: {user?.name}</p>
+      <div className="dashboard-header">
+        <div className="user-info">
+          {user?.picture && (
+            <img 
+              src={user.picture} 
+              alt="Profile" 
+              className="profile-picture"
+            />
+          )}
+          <div className="user-details">
+            <h1>Welcome, {user?.name}!</h1>
+            <p>Email: {user?.email}</p>
+          </div>
         </div>
+        <button onClick={handleSignOut} className="sign-out-button">
+          Sign Out
+        </button>
       </div>
-      <button onClick={handleSignOut} className="sign-out-button">
-        Sign Out
-      </button>
+      
+      <div className="dashboard-content">
+        <h2>Search and Share GIFs</h2>
+        <GiphySearch />
+      </div>
     </div>
   );
 }
