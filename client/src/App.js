@@ -3,6 +3,10 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import './App.css';
 import Dashboard from './components/Dashboard';
 
+// Add new imports
+import Navigation from './components/Navigation';
+import Create from './components/Create';
+
 function App() {
   const [user, setUser] = useState(() => {
     // Initialize user state from localStorage if it exists
@@ -45,6 +49,7 @@ function App() {
 
   return (
     <Router>
+      {user && <Navigation />}
       <Routes>
         <Route
           path="/"
@@ -71,6 +76,16 @@ function App() {
           element={
             user ? (
               <Dashboard user={user} onSignOut={handleSignOut} />
+            ) : (
+              <Navigate to="/" replace />
+            )
+          }
+        />
+        <Route
+          path="/create"
+          element={
+            user ? (
+              <Create user={user} />
             ) : (
               <Navigate to="/" replace />
             )

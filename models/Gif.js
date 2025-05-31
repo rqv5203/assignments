@@ -9,6 +9,7 @@ class Gif {
         this.userId = gifData.userId;            // User who saved the GIF
         this.savedAt = gifData.savedAt || new Date();
         this.tags = gifData.tags || [];          // Array of tags
+        this.caption = gifData.caption || '';    // Caption for meme
     }
 
     static async findById(id) {
@@ -35,6 +36,7 @@ class Gif {
                         url: this.url,
                         preview: this.preview,
                         tags: this.tags,
+                        caption: this.caption,
                         updatedAt: new Date()
                     }
                 }
@@ -64,6 +66,20 @@ class Gif {
     static async findByTag(tag) {
         const db = getDB();
         return await db.collection('gifs').find({ tags: tag }).toArray();
+    }
+
+    // Update caption
+    static async updateCaption(id, caption) {
+        const db = getDB();
+        return await db.collection('gifs').updateOne(
+            { id },
+            { 
+                $set: { 
+                    caption,
+                    updatedAt: new Date()
+                }
+            }
+        );
     }
 }
 

@@ -15,7 +15,8 @@ router.post('/save', async (req, res) => {
             url: req.body.url,
             preview: req.body.preview,
             userId: req.user.email,
-            tags: req.body.tags || []
+            tags: req.body.tags || [],
+            caption: req.body.caption || ''
         };
 
         const gif = new Gif(gifData);
@@ -59,6 +60,26 @@ router.delete('/:id', async (req, res) => {
     } catch (error) {
         console.error('Error deleting GIF:', error);
         res.status(500).json({ success: false, error: 'Failed to delete GIF' });
+    }
+});
+
+// Update GIF caption
+router.put('/:id/caption', async (req, res) => {
+    try {
+        const gif = await Gif.findById(req.params.id);
+        if (!gif) {
+            return res.status(404).json({ success: false, error: 'GIF not found' });
+        }
+        
+        if (gif.userId !== req.user.email) {
+            return res.status(403).json({ success: false, error: 'Unauthorized access' });
+        }
+
+        await Gif.updateCaption(req.params.id, req.body.caption);
+        res.json({ success: true });
+    } catch (error) {
+        console.error('Error updating caption:', error);
+        res.status(500).json({ success: false, error: 'Failed to update caption' });
     }
 });
 
