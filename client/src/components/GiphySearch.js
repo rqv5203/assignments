@@ -13,20 +13,35 @@ const GiphySearch = ({ user }) => {
   //console.log('Giphy API Key:', GIPHY_API_KEY);
   const GIPHY_API_URL = 'https://api.giphy.com/v1/gifs/search';
 
+  // Create axios instance with auth header
+  const authAxios = axios.create({
+    headers: {
+      'Authorization': `Bearer ${user?.token}`
+    }
+  });
+
+  // Debug log for user data
+  useEffect(() => {
+    console.log('Current user data:', user);
+    console.log('Auth token:', user?.token);
+  }, [user]);
+
   // Fetch user's saved GIFs on component mount
   useEffect(() => {
-    if (user?.email) {
+    if (user?.email && user?.token) {
       fetchSavedGifs();
     }
-  }, [user?.email]);
+  }, [user?.email, user?.token]);
 
   const fetchSavedGifs = async () => {
     try {
-      const response = await axios.get(`http://localhost:3000/gifs/user/${user.email}`);
+      console.log('Fetching saved GIFs with token:', user?.token);
+      const response = await authAxios.get(`http://localhost:3000/gifs/user/${user.email}`);
       const savedGifIds = new Set(response.data.gifs.map(gif => gif.id));
       setSavedGifs(savedGifIds);
     } catch (err) {
-      console.error('Error fetching saved GIFs:', err);
+      console.error('Error fetching saved GIFs:', err.response || err);
+      setError('Failed to fetch saved GIFs. Please try again.');
     }
   };
 
@@ -58,33 +73,34 @@ const GiphySearch = ({ user }) => {
 
   const handleSaveGif = async (gif) => {
     try {
+      console.log('Saving GIF with token:', user?.token);
       const gifData = {
         id: gif.id,
         title: gif.title,
         url: gif.images.original.url,
         preview: gif.images.fixed_height.url,
-        userId: user.email,
         tags: []
       };
 
-      await axios.post('http://localhost:3000/gifs/save', gifData);
+      await authAxios.post('http://localhost:3000/gifs/save', gifData);
       setSavedGifs(prev => new Set([...prev, gif.id]));
     } catch (err) {
-      console.error('Error saving GIF:', err);
+      console.error('Error saving GIF:', err.response || err);
       setError('Failed to save GIF. Please try again.');
     }
   };
 
   const handleRemoveGif = async (gifId) => {
     try {
-      await axios.delete(`http://localhost:3000/gifs/${gifId}`);
+      console.log('Removing GIF with token:', user?.token);
+      await authAxios.delete(`http://localhost:3000/gifs/${gifId}`);
       setSavedGifs(prev => {
         const newSet = new Set(prev);
         newSet.delete(gifId);
         return newSet;
       });
     } catch (err) {
-      console.error('Error removing GIF:', err);
+      console.error('Error removing GIF:', err.response || err);
       setError('Failed to remove GIF. Please try again.');
     }
   };

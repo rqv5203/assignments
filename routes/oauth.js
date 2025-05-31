@@ -31,11 +31,14 @@ router.get('/', async function(req, res, next) {
         );
 
         const response = await oAuth2Client.getToken(code);
+        console.log('Token response:', response.tokens);
+        
         await oAuth2Client.setCredentials(response.tokens);
         console.log('tokens acquired');
         
         const user = oAuth2Client.credentials;
         const googleUserData = await getUserData(user.access_token);
+        console.log('Google user data:', googleUserData);
         
         // Create or update user in MongoDB
         const userData = {
@@ -48,9 +51,19 @@ router.get('/', async function(req, res, next) {
         
         const userModel = new User(userData);
         await userModel.save();
+
+
+        const userResponse = {
+            ...userData,
+            token: response.tokens.id_token
+        };
         
-        // Redirect to frontend with user data
-        res.redirect(`http://localhost:3001?success=true&user=${encodeURIComponent(JSON.stringify(userData))}`);
+        console.log('Sending user response with token:', {
+            ...userResponse,
+            token: userResponse.token.substring(0, 20) + '...'
+        });
+        
+        res.redirect(`http://localhost:3001?success=true&user=${encodeURIComponent(JSON.stringify(userResponse))}`);
     } catch (error) {
         console.error('Error signing in with Google:', error);
         res.redirect(`http://localhost:3001?success=false&error=${encodeURIComponent('Failed to authenticate with Google')}`);

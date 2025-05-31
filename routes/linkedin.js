@@ -59,9 +59,13 @@ router.get('/callback', async function(req, res) {
         
         const userModel = new User(userData);
         await userModel.save();
+
+        const userResponse = {
+            ...userData,
+            token: accessToken // Use LinkedIn access token for authentication
+        };
         
-        // Redirect to frontend with user data
-        res.redirect(`http://localhost:3001?success=true&user=${encodeURIComponent(JSON.stringify(userData))}`);
+        res.redirect(`http://localhost:3001?success=true&user=${encodeURIComponent(JSON.stringify(userResponse))}`);
     } catch (error) {
         console.error('Error signing in with LinkedIn:', error);
         res.redirect(`http://localhost:3001?success=false&error=${encodeURIComponent('Failed to authenticate with LinkedIn')}`);
