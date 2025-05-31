@@ -1,16 +1,34 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './GiphySearch.css';
 
-const GiphySearch = () => {
+const GiphySearch = ({ user }) => {
   const [search, setSearch] = useState('');
   const [gifs, setGifs] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [savedGifs, setSavedGifs] = useState(new Set());
 
   //const GIPHY_API_KEY = process.env.REACT_APP_GIPHY_KEY;
   //console.log('Giphy API Key:', GIPHY_API_KEY);
   const GIPHY_API_URL = 'https://api.giphy.com/v1/gifs/search';
+
+  // Fetch user's saved GIFs on component mount
+  useEffect(() => {
+    if (user?.email) {
+      fetchSavedGifs();
+    }
+  }, [user?.email]);
+
+  const fetchSavedGifs = async () => {
+    try {
+      const response = await axios.get(`http://localhost:3000/gifs/user/${user.email}`);
+      const savedGifIds = new Set(response.data.gifs.map(gif => gif.id));
+      setSavedGifs(savedGifIds);
+    } catch (err) {
+      console.error('Error fetching saved GIFs:', err);
+    }
+  };
 
   const searchGifs = async (e) => {
     e.preventDefault();
@@ -35,6 +53,39 @@ const GiphySearch = () => {
       console.error('Error fetching GIFs:', err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSaveGif = async (gif) => {
+    try {
+      const gifData = {
+        id: gif.id,
+        title: gif.title,
+        url: gif.images.original.url,
+        preview: gif.images.fixed_height.url,
+        userId: user.email,
+        tags: []
+      };
+
+      await axios.post('http://localhost:3000/gifs/save', gifData);
+      setSavedGifs(prev => new Set([...prev, gif.id]));
+    } catch (err) {
+      console.error('Error saving GIF:', err);
+      setError('Failed to save GIF. Please try again.');
+    }
+  };
+
+  const handleRemoveGif = async (gifId) => {
+    try {
+      await axios.delete(`http://localhost:3000/gifs/${gifId}`);
+      setSavedGifs(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(gifId);
+        return newSet;
+      });
+    } catch (err) {
+      console.error('Error removing GIF:', err);
+      setError('Failed to remove GIF. Please try again.');
     }
   };
 
@@ -66,6 +117,23 @@ const GiphySearch = () => {
                 alt={gif.title}
                 loading="lazy"
               />
+              <div className="gif-actions">
+                {savedGifs.has(gif.id) ? (
+                  <button 
+                    onClick={() => handleRemoveGif(gif.id)}
+                    className="remove-button"
+                  >
+                    Remove
+                  </button>
+                ) : (
+                  <button 
+                    onClick={() => handleSaveGif(gif)}
+                    className="save-button"
+                  >
+                    Save
+                  </button>
+                )}
+              </div>
             </div>
           ))}
         </div>

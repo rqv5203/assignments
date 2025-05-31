@@ -34,7 +34,7 @@ function Dashboard({ user, onSignOut }) {
       
       <div className="dashboard-content">
         <h2>Search and Share GIFs</h2>
-        <GiphySearch />
+        <GiphySearch user={user} />
       </div>
     </div>
   );

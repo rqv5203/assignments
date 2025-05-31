@@ -18,9 +18,11 @@ app.use(express.json());
 var requestRoutes = require('./routes/request');
 var oauthRoutes = require('./routes/oauth');
 var linkedinRoutes = require('./routes/linkedin');
+var gifsRoutes = require('./routes/gifs');
 
 app.use('/request', requestRoutes);
 app.use('/oauth', oauthRoutes);
 app.use('/auth/linkedin', linkedinRoutes);
+app.use('/gifs', gifsRoutes);
 
 module.exports = app;
